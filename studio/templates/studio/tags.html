@@ -1,0 +1,35 @@
+{% extends "studio/shell.html" %}
+{% load blog_extras %}
+
+{% block title %}برچسب‌ها{% endblock %}
+
+{% block content %}
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">برچسب‌ها</h1>
+    <p class="muted">برچسب‌ها هنگام نوشتن و با تایپ در ادیتور ساخته می‌شوند. اینجا می‌توانی برچسب‌های بی‌استفاده را پاک کنی.</p>
+  </div>
+</header>
+
+{% if tags %}
+  <ul class="rows rows--table">
+    {% for t in tags %}
+      <li class="row">
+        <div class="row__main">
+          <a class="row__title" href="{% url 'studio:posts' %}?tag={{ t.slug }}">{{ t.name }}</a>
+        </div>
+        <span class="row__date">{{ t.n|fa_digits }} نوشته</span>
+        <form method="post" action="{% url 'studio:tag_delete' t.pk %}" data-confirm="برچسب «{{ t.name }}» از {{ t.n|fa_digits }} نوشته برداشته و حذف شود؟">
+          {% csrf_token %}
+          <button class="icon-btn icon-btn--danger" type="submit" aria-label="حذف برچسب «{{ t.name }}»" title="حذف">{% include "studio/_icon.html" with name="trash" %}</button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <div class="empty">
+    <h2>هنوز برچسبی نداری</h2>
+    <p>در ادیتور، زیر «برچسب‌ها» اسم یک موضوع را بنویس و Enter بزن.</p>
+  </div>
+{% endif %}
+{% endblock %}

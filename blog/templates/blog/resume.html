@@ -1,0 +1,121 @@
+{% extends "blog/base.html" %}
+{% load blog_extras %}
+
+{% block title %}رزومه · {{ SITE_NAME }}{% endblock %}
+{% block description %}رزومه‌ی {{ resume.name|default:AUTHOR_NAME|default:SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container container--narrow resume">
+  <header class="resume__head">
+    <p class="eyebrow">رزومه</p>
+    <h1 class="resume__name" dir="auto">{{ resume.name|default:AUTHOR_NAME|default:SITE_NAME }}</h1>
+    {% if resume.headline %}<p class="resume__headline" dir="auto">{{ resume.headline }}</p>{% endif %}
+
+    {% if resume.location or resume.contact or GITHUB_URL %}
+      <ul class="resume__contact">
+        {% if resume.location %}<li>{{ resume.location }}</li>{% endif %}
+        {% for c in resume.contact %}
+          <li><a href="{{ c.url }}"{% if c.url|slice:":4" == "http" %} target="_blank" rel="noopener noreferrer"{% endif %}>{{ c.label }}</a></li>
+        {% endfor %}
+        {% if GITHUB_URL %}
+          <li><a class="gh-link" href="{{ GITHUB_URL }}" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub">{% include "blog/_github_icon.html" %}<span>GitHub</span></a></li>
+        {% endif %}
+      </ul>
+    {% endif %}
+
+    {% if resume_filled %}
+      <div class="resume__actions">
+        <button class="btn" type="button" onclick="window.print()">چاپ / ذخیره‌ی PDF</button>
+      </div>
+    {% endif %}
+  </header>
+
+  {% if not resume_filled %}
+    <div class="empty">
+      <p class="empty__icon" aria-hidden="true">📄</p>
+      <p>رزومه به‌زودی تکمیل می‌شود.</p>
+      {% if user.is_staff %}
+        <p class="muted">برای پر کردن این صفحه، فایل <code dir="ltr">blog/resume_data.py</code> را ویرایش کن.</p>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {% if resume.summary %}
+    <section class="resume__section">
+      <h2>درباره‌ی من</h2>
+      <p dir="auto">{{ resume.summary|linebreaksbr }}</p>
+    </section>
+  {% endif %}
+
+  {% if resume.experience %}
+    <section class="resume__section">
+      <h2>سوابق کاری</h2>
+      {% for job in resume.experience %}
+        <article class="resume__item">
+          <div class="resume__row">
+            <h3 dir="auto">{{ job.title }}{% if job.company %} <span class="muted">· {{ job.company }}</span>{% endif %}</h3>
+            {% if job.period %}<span class="muted resume__period">{{ job.period }}</span>{% endif %}
+          </div>
+          {% if job.description %}<p dir="auto">{{ job.description }}</p>{% endif %}
+          {% if job.bullets %}
+            <ul>{% for b in job.bullets %}<li dir="auto">{{ b }}</li>{% endfor %}</ul>
+          {% endif %}
+        </article>
+      {% endfor %}
+    </section>
+  {% endif %}
+
+  {% if resume.projects %}
+    <section class="resume__section">
+      <h2>پروژه‌ها</h2>
+      {% for p in resume.projects %}
+        <article class="resume__item">
+          <h3 dir="auto">
+            {% if p.url %}<a href="{{ p.url }}" target="_blank" rel="noopener noreferrer">{{ p.name }}</a>{% else %}{{ p.name }}{% endif %}
+          </h3>
+          {% if p.description %}<p dir="auto">{{ p.description }}</p>{% endif %}
+        </article>
+      {% endfor %}
+    </section>
+  {% endif %}
+
+  {% if resume.skills %}
+    <section class="resume__section">
+      <h2>مهارت‌ها</h2>
+      {% for group in resume.skills %}
+        <div class="resume__skills">
+          {% if group.group %}<strong>{{ group.group }}</strong>{% endif %}
+          <div class="resume__chips" dir="auto">
+            {% for s in group.skills %}<span class="tag">{{ s }}</span>{% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    </section>
+  {% endif %}
+
+  {% if resume.education %}
+    <section class="resume__section">
+      <h2>تحصیلات</h2>
+      {% for e in resume.education %}
+        <article class="resume__item">
+          <div class="resume__row">
+            <h3 dir="auto">{{ e.title }}{% if e.school %} <span class="muted">· {{ e.school }}</span>{% endif %}</h3>
+            {% if e.period %}<span class="muted resume__period">{{ e.period }}</span>{% endif %}
+          </div>
+        </article>
+      {% endfor %}
+    </section>
+  {% endif %}
+
+  {% if resume.languages %}
+    <section class="resume__section">
+      <h2>زبان‌ها</h2>
+      <ul class="resume__langs">
+        {% for l in resume.languages %}
+          <li>{{ l.name }}{% if l.level %} <span class="muted">· {{ l.level }}</span>{% endif %}</li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}

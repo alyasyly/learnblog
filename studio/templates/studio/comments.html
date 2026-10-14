@@ -1,0 +1,83 @@
+{% extends "studio/shell.html" %}
+{% load blog_extras %}
+
+{% block title %}دیدگاه‌ها{% endblock %}
+
+{% block content %}
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">دیدگاه‌ها</h1>
+    <p class="muted">{{ counts.total|fa_digits }} دیدگاه از خواننده‌ها</p>
+  </div>
+</header>
+
+<form class="filters" method="get" role="search">
+  <nav class="tabs" aria-label="فیلتر وضعیت">
+    <a href="?{% if query %}q={{ query|urlencode }}{% endif %}"{% if not status %} aria-current="true"{% endif %}>همه <span>{{ counts.total|fa_digits }}</span></a>
+    <a href="?status=approved{% if query %}&amp;q={{ query|urlencode }}{% endif %}"{% if status == 'approved' %} aria-current="true"{% endif %}>نمایش داده می‌شود <span>{{ counts.approved|fa_digits }}</span></a>
+    <a href="?status=pending{% if query %}&amp;q={{ query|urlencode }}{% endif %}"{% if status == 'pending' %} aria-current="true"{% endif %}>پنهان / در انتظار <span>{{ counts.pending|fa_digits }}</span></a>
+  </nav>
+
+  <div class="filters__search">
+    {% if status %}<input type="hidden" name="status" value="{{ status }}">{% endif %}
+    <label class="search-box">
+      {% include "studio/_icon.html" with name="search" %}
+      <input type="search" name="q" value="{{ query }}" placeholder="جستجو در متن، کاربر یا نوشته" aria-label="جستجو">
+    </label>
+    <button class="btn btn--ghost" type="submit">جستجو</button>
+  </div>
+</form>
+
+{% if page_obj %}
+  <ul class="rows rows--table">
+    {% for c in page_obj %}
+      <li class="row">
+        <div class="row__main">
+          <span class="row__title">{{ c.author.get_username }}{% if c.author.is_staff %} · نویسنده{% endif %}</span>
+          <span class="row__sub">روی <a href="{{ c.post.get_absolute_url }}#comment-{{ c.pk }}" target="_blank" rel="noopener">{{ c.post.title }}</a></span>
+          <p class="row__excerpt" dir="auto">{{ c.body|truncatechars:200 }}</p>
+        </div>
+        <span class="row__date">{{ c.created_at|jdate:"short" }}</span>
+        <span class="state state--{% if c.is_approved %}live{% else %}draft{% endif %}">{% if c.is_approved %}نمایش داده می‌شود{% else %}پنهان{% endif %}</span>
+        <div class="row__actions">
+          <form method="post" action="{% url 'studio:comment_action' c.pk %}">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            {% if c.is_approved %}
+              <input type="hidden" name="action" value="hide">
+              <button class="icon-btn" type="submit" aria-label="پنهان کردن دیدگاه {{ c.author.get_username }}" title="پنهان کردن">{% include "studio/_icon.html" with name="close" %}</button>
+            {% else %}
+              <input type="hidden" name="action" value="approve">
+              <button class="icon-btn" type="submit" aria-label="نمایش دیدگاه {{ c.author.get_username }}" title="نمایش دادن">{% include "studio/_icon.html" with name="check" %}</button>
+            {% endif %}
+          </form>
+          <form method="post" action="{% url 'studio:comment_action' c.pk %}" data-confirm="این دیدگاه برای همیشه حذف شود؟">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <input type="hidden" name="action" value="delete">
+            <button class="icon-btn icon-btn--danger" type="submit" aria-label="حذف دیدگاه {{ c.author.get_username }}" title="حذف">{% include "studio/_icon.html" with name="trash" %}</button>
+          </form>
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+
+  {% if is_paginated %}
+    <nav class="pager" aria-label="صفحه‌بندی">
+      {% if page_obj.has_previous %}<a class="btn btn--ghost" href="{% page_url page_obj.previous_page_number %}">قبلی</a>{% else %}<span></span>{% endif %}
+      <span class="muted">صفحه {{ page_obj.number|fa_digits }} از {{ paginator.num_pages|fa_digits }}</span>
+      {% if page_obj.has_next %}<a class="btn btn--ghost" href="{% page_url page_obj.next_page_number %}">بعدی</a>{% else %}<span></span>{% endif %}
+    </nav>
+  {% endif %}
+{% else %}
+  <div class="empty">
+    {% if query or status %}
+      <h2>دیدگاهی با این فیلتر پیدا نشد</h2>
+      <p>فیلتر را عوض کن یا <a href="{% url 'studio:comments' %}">همه‌ی دیدگاه‌ها</a> را ببین.</p>
+    {% else %}
+      <h2>هنوز دیدگاهی نیامده</h2>
+      <p>وقتی خواننده‌ها زیر نوشته‌هایت دیدگاه بگذارند، اینجا می‌بینی‌شان.</p>
+    {% endif %}
+  </div>
+{% endif %}
+{% endblock %}

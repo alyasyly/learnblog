@@ -1,0 +1,95 @@
+{% extends "studio/shell.html" %}
+{% load blog_extras %}
+
+{% block title %}داشبورد{% endblock %}
+
+{% block content %}
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{ greeting }}، {{ display_name }}</h1>
+    <p class="muted">{{ today }}</p>
+  </div>
+  <a class="btn btn--primary" href="{% url 'studio:post_create' %}">
+    {% include "studio/_icon.html" with name="plus" %} نوشته‌ی جدید
+  </a>
+</header>
+
+{% if resume %}
+  <section class="resume" aria-labelledby="resume-title">
+    <div class="resume__text">
+      <p class="resume__kicker">پیش‌نویسی که نیمه‌کاره مانده</p>
+      <h2 id="resume-title" class="resume__title">{{ resume.title }}</h2>
+      <p class="resume__excerpt">{{ resume.excerpt }}</p>
+      <p class="resume__meta">آخرین ویرایش: {{ resume.updated_at|jdate }}، {{ resume.body.split|length|fa_digits }} کلمه</p>
+    </div>
+    <a class="btn btn--primary resume__go" href="{% url 'studio:post_edit' resume.pk %}">ادامه‌ی نوشتن</a>
+  </section>
+{% elif not stats.total %}
+  <section class="resume">
+    <div class="resume__text">
+      <h2 class="resume__title">هنوز چیزی ننوشته‌ای</h2>
+      <p class="resume__excerpt">اولین نوشته‌ات را بساز. حتی یک یادداشت دو خطی هم می‌تواند شروع باشد.</p>
+    </div>
+    <a class="btn btn--primary resume__go" href="{% url 'studio:post_create' %}">نوشتن اولین نوشته</a>
+  </section>
+{% endif %}
+
+<section class="stats" aria-label="آمار">
+  <a class="stat" href="{% url 'studio:posts' %}?status=live">
+    <span class="stat__num">{{ stats.live|fa_digits }}</span>
+    <span class="stat__label">منتشر شده</span>
+  </a>
+  <a class="stat" href="{% url 'studio:posts' %}?status=draft">
+    <span class="stat__num">{{ stats.draft|fa_digits }}</span>
+    <span class="stat__label">پیش‌نویس</span>
+  </a>
+  <a class="stat" href="{% url 'studio:posts' %}?status=scheduled">
+    <span class="stat__num">{{ stats.scheduled|fa_digits }}</span>
+    <span class="stat__label">زمان‌بندی‌شده</span>
+  </a>
+  <div class="stat">
+    <span class="stat__num">{{ total_words|fa_digits }}</span>
+    <span class="stat__label">کلمه نوشته‌ای</span>
+  </div>
+</section>
+
+<div class="split">
+  <section class="block" aria-labelledby="recent-title">
+    <div class="block__head">
+      <h2 id="recent-title">آخرین ویرایش‌ها</h2>
+      <a href="{% url 'studio:posts' %}">همه‌ی نوشته‌ها</a>
+    </div>
+    {% if recent %}
+      <ul class="rows">
+        {% for post in recent %}
+          <li class="row">
+            <div class="row__main">
+              <a class="row__title" href="{% url 'studio:post_edit' post.pk %}">{{ post.title }}</a>
+              <span class="row__sub">{{ post.updated_at|jdate }}</span>
+            </div>
+            {% include "studio/_state.html" %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="block__empty">بعد از اولین نوشته، آخرین ویرایش‌ها اینجا دیده می‌شوند.</p>
+    {% endif %}
+  </section>
+
+  <section class="block" aria-labelledby="activity-title">
+    <div class="block__head">
+      <h2 id="activity-title">ریتم نوشتن</h2>
+      <span class="muted">{{ activity_total|fa_digits }} نوشته در ۱۲ هفته‌ی اخیر</span>
+    </div>
+    <div class="bars" role="img" aria-label="تعداد نوشته‌های ساخته‌شده در هر هفته، از ۱۲ هفته پیش تا همین هفته">
+      {% for week in activity %}
+        <span class="bars__col{% if week.count %} has-value{% endif %}" style="height: {{ week.height }}%" title="{{ week.count|fa_digits }} نوشته"></span>
+      {% endfor %}
+    </div>
+    <div class="bars__axis"><span>۱۲ هفته پیش</span><span>این هفته</span></div>
+    <p class="block__foot">
+      <a href="{% url 'studio:tags' %}">{{ tag_total|fa_digits }} برچسب</a> برای دسته‌بندی نوشته‌ها داری.
+    </p>
+  </section>
+</div>
+{% endblock %}

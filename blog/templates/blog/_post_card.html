@@ -1,0 +1,17 @@
+{% load blog_extras %}
+<article class="card">
+  {% if post.tags.all %}
+    <div class="card__tags">
+      {% for t in post.tags.all %}
+        <a class="tag" href="{{ t.get_absolute_url }}">{{ t.name }}</a>
+      {% endfor %}
+    </div>
+  {% endif %}
+  <h2 class="card__title"><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h2>
+  <p class="card__summary">{{ post.excerpt }}</p>
+  <div class="card__meta">
+    <time datetime="{{ post.published_at|date:'c' }}">{{ post.published_at|jdate }}</time>
+    <span aria-hidden="true">·</span>
+    <span>{{ post.reading_time|fa_digits }} دقیقه مطالعه</span>
+  </div>
+</article>

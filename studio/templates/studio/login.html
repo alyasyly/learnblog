@@ -1,0 +1,39 @@
+{% extends "studio/base.html" %}
+
+{% block title %}ورود{% endblock %}
+{% block body_class %}login-page{% endblock %}
+
+{% block body %}
+<div class="login">
+  <section class="login__art" aria-hidden="true">
+    <p class="login__slogan">هر چیزی که یاد گرفتی، یک بار بنویس.</p>
+  </section>
+
+  <section class="login__panel">
+    <form class="login__form" method="post" novalidate>
+      {% csrf_token %}
+      <h1>ورود به استودیو</h1>
+      <p class="muted">برای نوشتن و مدیریت نوشته‌های «{{ SITE_NAME }}» وارد شو.</p>
+
+      {% if form.errors %}
+        <div class="alert alert--error" role="alert">
+          {% for error in form.non_field_errors %}{{ error }}{% empty %}نام کاربری و رمز عبور را وارد کن.{% endfor %}
+        </div>
+      {% endif %}
+
+      <label class="field">
+        <span class="field__label">نام کاربری</span>
+        {{ form.username }}
+      </label>
+      <label class="field">
+        <span class="field__label">رمز عبور</span>
+        {{ form.password }}
+      </label>
+
+      {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+      <button class="btn btn--primary btn--block" type="submit">ورود</button>
+      <a class="login__back" href="{% url 'blog:list' %}">بازگشت به سایت</a>
+    </form>
+  </section>
+</div>
+{% endblock %}

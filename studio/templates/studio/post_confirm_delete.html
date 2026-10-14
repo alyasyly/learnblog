@@ -1,0 +1,18 @@
+{% extends "studio/shell.html" %}
+
+{% block title %}حذف نوشته{% endblock %}
+
+{% block content %}
+<section class="confirm">
+  <h1>«{{ post.title }}» حذف شود؟</h1>
+  <p>این کار قابل برگشت نیست. متن، برچسب‌های وصل‌شده و نشانی این نوشته از بین می‌رود.</p>
+  {% if post.state == "live" %}
+    <p class="confirm__warn">این نوشته الان در سایت منتشر شده است. اگر فقط نمی‌خواهی دیده شود، به‌جای حذف آن را به پیش‌نویس برگردان.</p>
+  {% endif %}
+  <form method="post" class="confirm__actions">
+    {% csrf_token %}
+    <button class="btn btn--danger" type="submit">حذف نوشته</button>
+    <a class="btn btn--ghost" href="{% url 'studio:post_edit' post.pk %}">انصراف</a>
+  </form>
+</section>
+{% endblock %}

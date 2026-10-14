@@ -1,0 +1,26 @@
+{% extends "blog/base.html" %}
+
+{% block title %}ورود · {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container auth">
+  <div class="auth__card">
+    <h1 class="auth__title">ورود</h1>
+    <p class="auth__lead">برای نوشتن دیدگاه وارد حسابت شو.</p>
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+
+      {% for error in form.non_field_errors %}<p class="form-error form-error--box">{{ error }}</p>{% endfor %}
+
+      {% include "accounts/_field.html" with field=form.username %}
+      {% include "accounts/_field.html" with field=form.password %}
+
+      <button class="btn btn--primary btn--block" type="submit">ورود</button>
+    </form>
+
+    <p class="auth__alt">حساب نداری؟ <a href="{% url 'accounts:signup' %}{% if next %}?next={{ next|urlencode }}{% endif %}">ثبت‌نام کن</a></p>
+  </div>
+</div>
+{% endblock %}

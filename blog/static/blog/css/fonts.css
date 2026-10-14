@@ -1,0 +1,16 @@
+/* Self-hosted fonts (SIL Open Font License; see ../fonts/OFL-*.txt).
+   Variable fonts: one file covers every weight, and nothing is loaded from Google. */
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("../fonts/vazirmatn.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../fonts/jetbrains-mono.woff2") format("woff2");
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}

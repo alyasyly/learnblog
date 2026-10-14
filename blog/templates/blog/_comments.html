@@ -1,0 +1,57 @@
+{% load blog_extras %}
+<section class="comments" id="comments" aria-labelledby="comments-title">
+  <h2 class="section-title" id="comments-title">
+    دیدگاه‌ها
+    {% if comments %}<span class="comments__count">{{ comments|length|fa_digits }}</span>{% endif %}
+  </h2>
+
+  {% if comments %}
+    <ol class="comment-list">
+      {% for c in comments %}
+        <li class="comment" id="comment-{{ c.pk }}">
+          <div class="comment__avatar" aria-hidden="true">{{ c.author.get_username|slice:":1"|upper }}</div>
+          <div class="comment__main">
+            <div class="comment__head">
+              <strong class="comment__name">{{ c.author.get_username }}</strong>
+              {% if c.author.is_staff %}<span class="comment__badge">نویسنده</span>{% endif %}
+              {% if not c.is_approved %}<span class="comment__badge comment__badge--pending">در انتظار تأیید</span>{% endif %}
+              <time class="muted" datetime="{{ c.created_at|date:'c' }}">{{ c.created_at|jdate }}</time>
+              {% if user.pk == c.author_id or user.is_staff %}
+                <form class="comment__delete-form" method="post" action="{% url 'blog:comment_delete' c.pk %}" data-confirm="این دیدگاه حذف شود؟">
+                  {% csrf_token %}
+                  <button class="comment__delete" type="submit">حذف</button>
+                </form>
+              {% endif %}
+            </div>
+            <p class="comment__body" dir="auto">{{ c.body|linebreaksbr }}</p>
+          </div>
+        </li>
+      {% endfor %}
+    </ol>
+  {% else %}
+    <p class="muted comments__empty">هنوز دیدگاهی نیست. اولین نفر باش.</p>
+  {% endif %}
+
+  <div class="comment-form" id="comment-form">
+    {% if user.is_authenticated %}
+      <form method="post" action="{% url 'blog:comment_add' post.slug %}">
+        {% csrf_token %}
+        <p class="muted comment-form__note">با نام <strong>{{ user.get_username }}</strong> می‌نویسی. دیدگاه‌ها متن ساده‌اند و لینک یا HTML اجرا نمی‌شود.</p>
+        {{ comment_form.body }}
+        <div class="hp" aria-hidden="true">{{ comment_form.hp_company_fax }}</div>
+        <div class="comment-form__foot">
+          <span class="muted">حداکثر {{ comment_form.body.field.max_length|fa_digits }} نویسه</span>
+          <button class="btn btn--primary" type="submit">ثبت دیدگاه</button>
+        </div>
+      </form>
+    {% else %}
+      <div class="comment-login">
+        <p>برای نوشتن دیدگاه باید وارد شوی یا حساب بسازی.</p>
+        <div class="comment-login__actions">
+          <a class="btn btn--primary" href="{% url 'accounts:login' %}?next={{ request.path|urlencode }}%23comment-form">ورود</a>
+          <a class="btn" href="{% url 'accounts:signup' %}?next={{ request.path|urlencode }}%23comment-form">ساخت حساب</a>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</section>

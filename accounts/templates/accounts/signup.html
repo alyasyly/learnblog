@@ -1,0 +1,29 @@
+{% extends "blog/base.html" %}
+
+{% block title %}ساخت حساب · {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container auth">
+  <div class="auth__card">
+    <h1 class="auth__title">ساخت حساب</h1>
+    <p class="auth__lead">با یک حساب رایگان می‌توانی زیر نوشته‌ها دیدگاه بگذاری. ایمیل لازم نیست.</p>
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+
+      {% for error in form.non_field_errors %}<p class="form-error form-error--box">{{ error }}</p>{% endfor %}
+
+      {% include "accounts/_field.html" with field=form.username show_help=True %}
+      {% include "accounts/_field.html" with field=form.password1 show_help=True %}
+      {% include "accounts/_field.html" with field=form.password2 %}
+
+      <div class="hp" aria-hidden="true">{{ form.hp_company_fax }}</div>
+
+      <button class="btn btn--primary btn--block" type="submit">ساخت حساب</button>
+    </form>
+
+    <p class="auth__alt">حساب داری؟ <a href="{% url 'accounts:login' %}{% if next %}?next={{ next|urlencode }}{% endif %}">وارد شو</a></p>
+  </div>
+</div>
+{% endblock %}

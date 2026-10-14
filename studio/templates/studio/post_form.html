@@ -1,0 +1,148 @@
+{% extends "studio/base.html" %}
+{% load static blog_extras %}
+
+{% block title %}{% if post %}ویرایش: {{ post.title }}{% else %}نوشته‌ی جدید{% endif %}{% endblock %}
+{% block body_class %}editor-page{% endblock %}
+
+{% block body %}
+<form method="post" id="post-form" class="editor mode-split" novalidate
+      data-preview-url="{% url 'studio:preview' %}"
+      data-draft-key="{% if post %}post-{{ post.pk }}{% else %}new{% endif %}"
+      data-updated="{% if post %}{{ post.updated_at|date:'U' }}{% endif %}">
+  {% csrf_token %}
+
+  <header class="ed-top">
+    <a class="ed-back" href="{% url 'studio:posts' %}">
+      {% include "studio/_icon.html" with name="back" %}
+      <span>نوشته‌ها</span>
+    </a>
+
+    <span class="save-state" id="save-state" role="status">
+      {% if post %}ذخیره‌شده{% else %}نوشته‌ی جدید{% endif %}
+    </span>
+
+    <div class="ed-modes" role="group" aria-label="نحوه‌ی نمایش">
+      <button type="button" data-mode="write" aria-pressed="false">{% include "studio/_icon.html" with name="write" %}<span>نوشتن</span></button>
+      <button type="button" data-mode="split" aria-pressed="true" class="only-wide">{% include "studio/_icon.html" with name="split" %}<span>کنار هم</span></button>
+      <button type="button" data-mode="preview" aria-pressed="false">{% include "studio/_icon.html" with name="eye" %}<span>پیش‌نمایش</span></button>
+    </div>
+
+    <div class="ed-actions">
+      {% if post %}
+        <a class="icon-btn" href="{{ post.get_absolute_url }}" target="_blank" rel="noopener" aria-label="دیدن در سایت" title="دیدن در سایت">{% include "studio/_icon.html" with name="external" %}</a>
+        <a class="icon-btn icon-btn--danger" href="{% url 'studio:post_delete' post.pk %}" aria-label="حذف نوشته" title="حذف نوشته">{% include "studio/_icon.html" with name="trash" %}</a>
+      {% endif %}
+      <button class="icon-btn" type="button" id="toggle-side" aria-controls="inspector" aria-expanded="true" aria-label="تنظیمات نوشته" title="تنظیمات نوشته">{% include "studio/_icon.html" with name="panel" %}</button>
+      <button class="btn btn--ghost" type="submit" name="action" value="save">ذخیره</button>
+      {% if not post or post.state != "live" %}
+        <button class="btn btn--primary" type="submit" name="action" value="publish">انتشار</button>
+      {% endif %}
+    </div>
+  </header>
+
+  {% if form.errors %}
+    <div class="alert alert--error ed-alert" role="alert">
+      <strong>نوشته ذخیره نشد.</strong>
+      <ul>
+        {% for field in form %}{% for error in field.errors %}<li>{{ field.label }}: {{ error }}</li>{% endfor %}{% endfor %}
+        {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <div class="ed-restore" id="restore" hidden>
+    <span>یک نسخه‌ی ذخیره‌نشده از <b id="restore-time"></b> روی این مرورگر پیدا شد.</span>
+    <button class="btn btn--small" type="button" id="restore-yes">بازگردانی</button>
+    <button class="btn btn--small btn--ghost" type="button" id="restore-no">نادیده بگیر</button>
+  </div>
+
+  <div class="ed-body">
+    <section class="ed-main" aria-label="ویرایشگر">
+      <div class="ed-title">
+        <label class="sr-only" for="{{ form.title.id_for_label }}">عنوان</label>
+        {{ form.title }}
+      </div>
+
+      <div class="ed-toolbar" role="toolbar" aria-label="قالب‌بندی">
+        <button type="button" data-cmd="bold" title="پررنگ (Ctrl+B)" aria-label="پررنگ"><b>B</b></button>
+        <button type="button" data-cmd="italic" title="کج (Ctrl+I)" aria-label="کج"><i>I</i></button>
+        <span class="sep" aria-hidden="true"></span>
+        <button type="button" data-cmd="h2" title="عنوان بخش" aria-label="عنوان بخش">H2</button>
+        <button type="button" data-cmd="h3" title="زیرعنوان" aria-label="زیرعنوان">H3</button>
+        <span class="sep" aria-hidden="true"></span>
+        <button type="button" data-cmd="ul" title="فهرست نقطه‌ای" aria-label="فهرست نقطه‌ای">{% include "studio/_icon.html" with name="ul" %}</button>
+        <button type="button" data-cmd="ol" title="فهرست شماره‌دار" aria-label="فهرست شماره‌دار">{% include "studio/_icon.html" with name="ol" %}</button>
+        <button type="button" data-cmd="quote" title="نقل‌قول" aria-label="نقل‌قول">{% include "studio/_icon.html" with name="quote" %}</button>
+        <span class="sep" aria-hidden="true"></span>
+        <button type="button" data-cmd="code" title="کد درون‌خطی" aria-label="کد درون‌خطی">{% include "studio/_icon.html" with name="code" %}</button>
+        <button type="button" data-cmd="codeblock" title="بلوک کد" aria-label="بلوک کد">{% include "studio/_icon.html" with name="codeblock" %}</button>
+        <button type="button" data-cmd="link" title="پیوند (Ctrl+K)" aria-label="پیوند">{% include "studio/_icon.html" with name="link" %}</button>
+        <button type="button" data-cmd="table" title="جدول" aria-label="جدول">{% include "studio/_icon.html" with name="table" %}</button>
+        <button type="button" data-cmd="hr" title="خط جداکننده" aria-label="خط جداکننده">{% include "studio/_icon.html" with name="hr" %}</button>
+      </div>
+
+      <div class="ed-panes">
+        <div class="pane pane--write">
+          <label class="sr-only" for="{{ form.body.id_for_label }}">متن</label>
+          {{ form.body }}
+        </div>
+        <div class="pane pane--preview" id="preview-pane" aria-label="پیش‌نمایش" tabindex="0">
+          <div class="prose" id="preview"></div>
+          <p class="preview-empty" id="preview-empty">پیش‌نمایش نوشته اینجا ظاهر می‌شود.</p>
+        </div>
+      </div>
+
+      <footer class="ed-foot">
+        <span><b id="stat-words">۰</b> کلمه</span>
+        <span><b id="stat-minutes">۱</b> دقیقه مطالعه</span>
+        <span class="ed-foot__hint">Ctrl+S ذخیره</span>
+      </footer>
+    </section>
+
+    <aside class="ed-side" id="inspector" aria-label="تنظیمات نوشته">
+      <section class="side-sec">
+        <h2>انتشار</h2>
+        <div class="seg" role="radiogroup" aria-label="وضعیت">
+          {% for radio in form.status %}
+            <label class="seg__opt">{{ radio.tag }}<span>{{ radio.choice_label }}</span></label>
+          {% endfor %}
+        </div>
+        <label class="field" for="{{ form.published_at.id_for_label }}">
+          <span class="field__label">زمان انتشار</span>
+          {{ form.published_at }}
+        </label>
+        <p class="hint" id="date-hint">اگر خالی بماند، هنگام انتشار روی همین لحظه تنظیم می‌شود. تاریخ آینده یعنی انتشار زمان‌بندی‌شده.</p>
+      </section>
+
+      <section class="side-sec">
+        <h2>برچسب‌ها</h2>
+        <div class="chips" id="chips">
+          <input type="text" id="tag-input" list="tag-suggestions" placeholder="نام برچسب، بعد Enter" autocomplete="off" aria-label="افزودن برچسب">
+        </div>
+        {{ form.tags_text }}
+        <datalist id="tag-suggestions">
+          {% for name in tag_suggestions %}<option value="{{ name }}">{% endfor %}
+        </datalist>
+      </section>
+
+      <section class="side-sec">
+        <h2>خلاصه</h2>
+        <label class="sr-only" for="{{ form.summary.id_for_label }}">خلاصه</label>
+        {{ form.summary }}
+        <p class="hint"><span id="summary-count">۰</span> از ۳۰۰ نویسه. اگر خالی بماند از ابتدای متن ساخته می‌شود.</p>
+      </section>
+
+      <section class="side-sec">
+        <h2>نشانی</h2>
+        <label class="sr-only" for="{{ form.slug.id_for_label }}">اسلاگ</label>
+        {{ form.slug }}
+        <p class="hint">بخش آخر نشانی نوشته. معمولاً لازم نیست دست بزنی.</p>
+      </section>
+    </aside>
+  </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'studio/js/editor.js' %}" defer></script>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "blog/base.html" %}
+
+{% block title %}صفحه پیدا نشد · {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="empty empty--page">
+    <p class="empty__code">۴۰۴</p>
+    <p>این صفحه پیدا نشد.</p>
+    <p><a class="btn" href="{% url 'blog:list' %}">بازگشت به خانه</a></p>
+  </div>
+</div>
+{% endblock %}

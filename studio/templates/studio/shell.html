@@ -1,0 +1,76 @@
+{% extends "studio/base.html" %}
+{% load blog_extras %}
+
+{% block body_class %}has-rail{% endblock %}
+
+{% block body %}
+{% with current=request.resolver_match.url_name %}
+<div class="shell">
+  <aside class="rail" id="rail" aria-label="منوی استودیو">
+    <div class="rail__top">
+      <a class="rail__brand" href="{% url 'studio:dashboard' %}">
+        <span class="rail__mark" aria-hidden="true">قلم</span>
+        <span class="rail__name">{{ SITE_NAME }}</span>
+      </a>
+      <button class="rail__close icon-btn" type="button" data-rail-close aria-label="بستن منو">
+        {% include "studio/_icon.html" with name="close" %}
+      </button>
+    </div>
+
+    <a class="btn btn--primary rail__new" href="{% url 'studio:post_create' %}">
+      {% include "studio/_icon.html" with name="plus" %}
+      نوشته‌ی جدید
+    </a>
+
+    <nav class="rail__nav">
+      <a href="{% url 'studio:dashboard' %}"{% if current == 'dashboard' %} aria-current="page"{% endif %}>
+        {% include "studio/_icon.html" with name="home" %} داشبورد
+      </a>
+      <a href="{% url 'studio:posts' %}"{% if current == 'posts' or current == 'post_delete' %} aria-current="page"{% endif %}>
+        {% include "studio/_icon.html" with name="posts" %} نوشته‌ها
+      </a>
+      <a href="{% url 'studio:tags' %}"{% if current == 'tags' %} aria-current="page"{% endif %}>
+        {% include "studio/_icon.html" with name="tag" %} برچسب‌ها
+      </a>
+      <a href="{% url 'studio:comments' %}"{% if current == 'comments' or current == 'comment_action' %} aria-current="page"{% endif %}>
+        {% include "studio/_icon.html" with name="quote" %} دیدگاه‌ها
+      </a>
+    </nav>
+
+    <div class="rail__foot">
+      <a class="rail__link" href="{% url 'blog:list' %}" target="_blank" rel="noopener">
+        {% include "studio/_icon.html" with name="external" %} دیدن سایت
+      </a>
+      <button class="rail__link" type="button" data-theme-toggle>
+        <span class="only-light">{% include "studio/_icon.html" with name="moon" %} پوسته‌ی تاریک</span>
+        <span class="only-dark">{% include "studio/_icon.html" with name="sun" %} پوسته‌ی روشن</span>
+      </button>
+      <form method="post" action="{% url 'studio:logout' %}">
+        {% csrf_token %}
+        <button class="rail__link" type="submit">
+          {% include "studio/_icon.html" with name="logout" %} خروج
+          <span class="rail__user">{{ request.user.get_username }}</span>
+        </button>
+      </form>
+    </div>
+  </aside>
+
+  <div class="shell__main">
+    <header class="topbar">
+      <button class="icon-btn" type="button" data-rail-open aria-label="باز کردن منو">
+        {% include "studio/_icon.html" with name="menu" %}
+      </button>
+      <span class="topbar__name">{{ SITE_NAME }}</span>
+      <a class="icon-btn" href="{% url 'studio:post_create' %}" aria-label="نوشته‌ی جدید">
+        {% include "studio/_icon.html" with name="plus" %}
+      </a>
+    </header>
+
+    <main class="page" id="main">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  <div class="scrim" data-rail-close></div>
+</div>
+{% endwith %}
+{% endblock %}

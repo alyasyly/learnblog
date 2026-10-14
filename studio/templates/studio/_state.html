@@ -1,0 +1,7 @@
+{% if post.state == "live" %}
+  <span class="state state--live">منتشر شده</span>
+{% elif post.state == "scheduled" %}
+  <span class="state state--scheduled">زمان‌بندی‌شده</span>
+{% else %}
+  <span class="state state--draft">پیش‌نویس</span>
+{% endif %}

@@ -1,0 +1,134 @@
+{% extends "studio/base.html" %}
+{% load static blog_extras %}
+
+{% block title %}{% if post %}ویرایش نوشته{% else %}نوشته‌ی جدید{% endif %}{% endblock %}
+{% block body_class %}is-editor{% endblock %}
+
+{% block content %}
+<form class="editor" id="editor-form" method="post" novalidate
+      data-preview-url="{% url 'studio:preview' %}"
+      data-draft-key="studio-draft-{% if post %}{{ post.pk }}{% else %}new{% endif %}">
+  {% csrf_token %}
+  {# Default button for Enter-key submits (without JS): a plain save, never an unpublish. #}
+  <button class="sr-only" type="submit" name="action" value="save" tabindex="-1" aria-hidden="true">ذخیره</button>
+
+  <div class="editor__bar">
+    <div class="editor__where">
+      <a class="editor__back" href="{% url 'studio:posts' %}">نوشته‌ها</a>
+      {% if post %}
+        <span class="pill pill--{{ post.state }}">{{ post.state_label }}</span>
+      {% else %}
+        <span class="pill pill--draft">نوشته‌ی جدید</span>
+      {% endif %}
+      <span class="editor__dirty" id="dirty" hidden>تغییر ذخیره‌نشده</span>
+    </div>
+
+    <div class="segmented" role="group" aria-label="نحوه‌ی نمایش">
+      <button type="button" data-mode="write">نوشتن</button>
+      <button type="button" data-mode="split">دو پنجره</button>
+      <button type="button" data-mode="preview">پیش‌نمایش</button>
+    </div>
+
+    <div class="editor__actions">
+      {% if post and post.state != 'draft' %}
+        <a class="btn" href="{{ post.get_absolute_url }}" target="_blank" rel="noopener">مشاهده</a>
+        <button class="btn" type="submit" name="action" value="unpublish">برگرداندن به پیش‌نویس</button>
+        <button class="btn btn--mark" type="submit" name="action" value="save" id="save-btn">به‌روزرسانی</button>
+      {% else %}
+        <button class="btn" type="submit" name="action" value="save" id="save-btn">ذخیره‌ی پیش‌نویس</button>
+        <button class="btn btn--mark" type="submit" name="action" value="publish">انتشار</button>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="recover" id="recover" hidden>
+    <p>نسخه‌ای ذخیره‌نشده از این نوشته در همین مرورگر پیدا شد.</p>
+    <div>
+      <button type="button" class="btn btn--mark" id="recover-yes">بازیابی</button>
+      <button type="button" class="btn" id="recover-no">دور انداختن</button>
+    </div>
+  </div>
+
+  <div class="editor__layout">
+    <section class="editor__main">
+      {{ form.title }}
+      {% for error in form.title.errors %}<p class="field__error">{{ error }}</p>{% endfor %}
+
+      {{ form.summary }}
+      {% for error in form.summary.errors %}<p class="field__error">{{ error }}</p>{% endfor %}
+
+      <div class="mdbar" role="toolbar" aria-label="قالب‌بندی Markdown">
+        <button type="button" data-md="bold" title="پررنگ (Ctrl+B)"><b>B</b></button>
+        <button type="button" data-md="italic" title="کج (Ctrl+I)"><i>I</i></button>
+        <button type="button" data-md="h2" title="عنوان بخش">عنوان</button>
+        <button type="button" data-md="h3" title="زیرعنوان">زیرعنوان</button>
+        <span class="mdbar__gap"></span>
+        <button type="button" data-md="link" title="پیوند (Ctrl+K)">پیوند</button>
+        <button type="button" data-md="code" title="کد درون‌خطی">کد</button>
+        <button type="button" data-md="codeblock" title="بلوک کد">بلوک کد</button>
+        <span class="mdbar__gap"></span>
+        <button type="button" data-md="quote" title="نقل‌قول">نقل‌قول</button>
+        <button type="button" data-md="ul" title="فهرست">فهرست</button>
+        <button type="button" data-md="ol" title="فهرست شماره‌دار">شماره‌دار</button>
+        <button type="button" data-md="table" title="جدول">جدول</button>
+        <button type="button" data-md="hr" title="خط جداکننده">خط</button>
+      </div>
+
+      <div class="panes" id="panes" data-mode="split">
+        <div class="sheet">
+          {{ form.body }}
+        </div>
+        <div class="preview prose" id="preview" aria-live="polite">
+          <p class="quiet">پیش‌نمایش اینجا نشان داده می‌شود.</p>
+        </div>
+      </div>
+      {% for error in form.body.errors %}<p class="field__error">{{ error }}</p>{% endfor %}
+
+      <div class="statusbar">
+        <span id="stat-words">۰ کلمه</span>
+        <span id="stat-time">۱ دقیقه مطالعه</span>
+        <span class="statusbar__hint">Ctrl+S برای ذخیره</span>
+      </div>
+    </section>
+
+    <aside class="editor__side">
+      <section class="setting">
+        <h2 class="setting__title">زمان انتشار</h2>
+        {{ form.published_at }}
+        {% for error in form.published_at.errors %}<p class="field__error">{{ error }}</p>{% endfor %}
+        <p class="setting__hint">خالی بگذار تا هنگام انتشار، همان لحظه ثبت شود. اگر زمان آینده بگذاری، نوشته زمان‌بندی می‌شود.</p>
+      </section>
+
+      <section class="setting">
+        <h2 class="setting__title">برچسب‌ها</h2>
+        <div class="tagbox" id="tagbox" hidden>
+          <ul class="tagbox__chips" id="tag-chips"></ul>
+          <input type="text" id="tag-entry" placeholder="بنویس و Enter بزن" autocomplete="off" aria-label="افزودن برچسب">
+        </div>
+        {{ form.tags_text }}
+        <div class="tagbox__suggest" id="tag-suggest" hidden></div>
+        {% for error in form.tags_text.errors %}<p class="field__error">{{ error }}</p>{% endfor %}
+      </section>
+
+      <section class="setting">
+        <h2 class="setting__title">نشانی نوشته</h2>
+        {{ form.slug }}
+        {% for error in form.slug.errors %}<p class="field__error">{{ error }}</p>{% endfor %}
+        <p class="setting__hint">بخشی از آدرس نوشته در سایت. بعد از انتشار بهتر است عوضش نکنی تا لینک‌ها نشکنند.</p>
+      </section>
+
+      {% if post %}
+        <section class="setting setting--danger">
+          <a class="is-danger" href="{% url 'studio:post_delete' post.pk %}">حذف این نوشته</a>
+        </section>
+      {% endif %}
+    </aside>
+  </div>
+</form>
+
+{{ tag_suggestions|json_script:"tag-suggestions" }}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'studio/js/editor.js' %}" defer></script>
+{% endblock %}

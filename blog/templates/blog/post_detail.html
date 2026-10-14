@@ -1,0 +1,91 @@
+{% extends "blog/base.html" %}
+{% load blog_extras %}
+
+{% block title %}{{ post.title }} · {{ SITE_NAME }}{% endblock %}
+{% block description %}{{ post.excerpt }}{% endblock %}
+
+{% block og %}
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="{{ post.title }}">
+  <meta property="og:description" content="{{ post.excerpt }}">
+  <meta property="og:url" content="{{ request.build_absolute_uri }}">
+{% endblock %}
+
+{% block content %}
+{% with rendered=post.rendered %}
+<div class="container container--narrow">
+
+  {% if not post.is_live %}
+    <div class="notice" role="status">
+      این نوشته هنوز منتشر نشده و فقط برای شما (مدیر سایت) نمایش داده می‌شود.
+      <a href="{% url 'studio:post_edit' post.pk %}">ویرایش</a>
+    </div>
+  {% endif %}
+
+  <article class="post">
+    <header class="post__header">
+      {% if post.tags.all %}
+        <div class="card__tags">
+          {% for t in post.tags.all %}
+            <a class="tag" href="{{ t.get_absolute_url }}">{{ t.name }}</a>
+          {% endfor %}
+        </div>
+      {% endif %}
+      <h1 class="post__title">{{ post.title }}</h1>
+      {% if post.summary %}<p class="post__summary">{{ post.summary }}</p>{% endif %}
+      <div class="card__meta">
+        {% if post.published_at %}
+          <time datetime="{{ post.published_at|date:'c' }}">{{ post.published_at|jdate }}</time>
+          <span aria-hidden="true">·</span>
+        {% endif %}
+        <span>{{ post.reading_time|fa_digits }} دقیقه مطالعه</span>
+        {% if post.updated_at and post.published_at and post.updated_at|date:"Ymd" != post.published_at|date:"Ymd" %}
+          <span aria-hidden="true">·</span>
+          <span>به‌روزرسانی: {{ post.updated_at|jdate }}</span>
+        {% endif %}
+      </div>
+    </header>
+
+    {% if rendered.toc %}
+      <details class="toc-box" open>
+        <summary>فهرست مطالب</summary>
+        {{ rendered.toc }}
+      </details>
+    {% endif %}
+
+    <div class="prose" id="post-content">
+      {{ rendered.html }}
+    </div>
+  </article>
+
+  {% if newer or older %}
+    <nav class="post-nav" aria-label="نوشته‌های دیگر">
+      {% if older %}
+        <a class="post-nav__item" href="{{ older.get_absolute_url }}" rel="prev">
+          <span class="post-nav__label">← نوشته قبلی</span>
+          <span class="post-nav__title">{{ older.title }}</span>
+        </a>
+      {% else %}<span></span>{% endif %}
+      {% if newer %}
+        <a class="post-nav__item post-nav__item--next" href="{{ newer.get_absolute_url }}" rel="next">
+          <span class="post-nav__label">نوشته بعدی →</span>
+          <span class="post-nav__title">{{ newer.title }}</span>
+        </a>
+      {% else %}<span></span>{% endif %}
+    </nav>
+  {% endif %}
+  {% include "blog/_comments.html" %}
+</div>
+
+{% if related %}
+  <section class="container related">
+    <h2 class="section-title">نوشته‌های مرتبط</h2>
+    <div class="grid">
+      {% for post in related %}
+        {% include "blog/_post_card.html" %}
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}
+{% endwith %}
+{% endblock %}

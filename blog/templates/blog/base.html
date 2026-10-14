@@ -1,0 +1,96 @@
+{% load static %}<!doctype html>
+<html lang="{{ LANGUAGE_CODE }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ SITE_NAME }}{% endblock %}</title>
+  <meta name="description" content="{% block description %}{{ SITE_TAGLINE }}{% endblock %}">
+  <meta property="og:site_name" content="{{ SITE_NAME }}">
+  {% block og %}{% endblock %}
+  <link rel="alternate" type="application/rss+xml" title="{{ SITE_NAME }}" href="{% url 'blog:feed' %}">
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000d00'/%3E%3Ctext x='4' y='22' font-family='monospace' font-size='18' fill='%2300ff41'%3E%3E_%3C/text%3E%3C/svg%3E">
+
+  <script>
+    /* Apply the saved (or system) theme before first paint to avoid a flash. */
+    (function () {
+      try {
+        var t = localStorage.getItem("theme");
+        if (!t) t = "dark";
+        document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="preload" href="{% static 'blog/fonts/vazirmatn.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{% static 'blog/css/fonts.css' %}">
+  <link rel="stylesheet" href="{% static 'blog/css/style.css' %}">
+  <link rel="stylesheet" href="{% static 'blog/css/pygments.css' %}">
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+  <a class="skip-link" href="#main">پرش به محتوا</a>
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="{% url 'blog:list' %}">
+        <span class="brand__mark" aria-hidden="true">✦</span>
+        <span class="brand__name">{{ SITE_NAME }}</span>
+      </a>
+
+      <nav class="site-nav" aria-label="ناوبری اصلی">
+        <a href="{% url 'blog:list' %}">نوشته‌ها</a>
+        <a href="{% url 'blog:feed' %}" title="اشتراک RSS">RSS</a>
+        {% if user.is_staff %}
+          <a href="{% url 'studio:dashboard' %}">استودیو</a>
+        {% endif %}
+        {% if user.is_authenticated %}
+          <span class="nav-user" title="{{ user.get_username }}">{{ user.get_username }}</span>
+          <form class="nav-form" method="post" action="{% url 'accounts:logout' %}">
+            {% csrf_token %}
+            <button class="nav-link-btn" type="submit">خروج</button>
+          </form>
+        {% else %}
+          <a href="{% url 'accounts:login' %}">ورود</a>
+          <a class="nav-cta" href="{% url 'accounts:signup' %}">ثبت‌نام</a>
+        {% endif %}
+        {% if GITHUB_URL %}
+        <a class="gh-link" href="{{ GITHUB_URL }}" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub">{% include "blog/_github_icon.html" %}</a>
+        {% endif %}
+        <button class="icon-btn" id="theme-toggle" type="button" aria-label="تغییر پوسته روشن/تاریک" title="تغییر پوسته">
+          <svg class="icon icon--sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+          <svg class="icon icon--moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </nav>
+    </div>
+    <div class="progress" id="progress" aria-hidden="true"></div>
+  </header>
+
+  {% if messages %}
+  <div class="container flash-wrap">
+    {% for message in messages %}
+      <div class="flash flash--{{ message.tags }}" role="status">{{ message }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <main id="main">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <p>{{ SITE_NAME }}{% if AUTHOR_NAME %} · {{ AUTHOR_NAME }}{% endif %}</p>
+      <p class="muted footer-links">
+        <a href="{% url 'blog:resume' %}">رزومه</a>
+        {% if GITHUB_URL %}<a class="gh-link" href="{{ GITHUB_URL }}" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub">{% include "blog/_github_icon.html" %}</a>{% endif %}
+        <span>ساخته‌شده با جنگو</span>
+      </p>
+    </div>
+  </footer>
+
+  <script src="{% static 'blog/js/app.js' %}" defer></script>
+</body>
+</html>

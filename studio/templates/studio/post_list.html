@@ -1,0 +1,81 @@
+{% extends "studio/shell.html" %}
+{% load blog_extras %}
+
+{% block title %}نوشته‌ها{% endblock %}
+
+{% block content %}
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">نوشته‌ها</h1>
+    <p class="muted">{{ counts.total|fa_digits }} نوشته در مجموع</p>
+  </div>
+  <a class="btn btn--primary" href="{% url 'studio:post_create' %}">
+    {% include "studio/_icon.html" with name="plus" %} نوشته‌ی جدید
+  </a>
+</header>
+
+<form class="filters" method="get" role="search">
+  <nav class="tabs" aria-label="فیلتر وضعیت">
+    <a href="?{% if query %}q={{ query|urlencode }}{% endif %}"{% if not status %} aria-current="true"{% endif %}>همه <span>{{ counts.total|fa_digits }}</span></a>
+    <a href="?status=live{% if query %}&amp;q={{ query|urlencode }}{% endif %}"{% if status == 'live' %} aria-current="true"{% endif %}>منتشر شده <span>{{ counts.live|fa_digits }}</span></a>
+    <a href="?status=draft{% if query %}&amp;q={{ query|urlencode }}{% endif %}"{% if status == 'draft' %} aria-current="true"{% endif %}>پیش‌نویس <span>{{ counts.draft|fa_digits }}</span></a>
+    <a href="?status=scheduled{% if query %}&amp;q={{ query|urlencode }}{% endif %}"{% if status == 'scheduled' %} aria-current="true"{% endif %}>زمان‌بندی‌شده <span>{{ counts.scheduled|fa_digits }}</span></a>
+  </nav>
+
+  <div class="filters__search">
+    {% if status %}<input type="hidden" name="status" value="{{ status }}">{% endif %}
+    <label class="search-box">
+      {% include "studio/_icon.html" with name="search" %}
+      <input type="search" name="q" value="{{ query }}" placeholder="جستجو در عنوان و متن" aria-label="جستجو">
+    </label>
+    <select name="tag" aria-label="فیلتر برچسب" data-autosubmit>
+      <option value="">همه‌ی برچسب‌ها</option>
+      {% for t in tags %}
+        <option value="{{ t.slug }}"{% if active_tag and active_tag.pk == t.pk %} selected{% endif %}>{{ t.name }} ({{ t.n|fa_digits }})</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn--ghost" type="submit">جستجو</button>
+  </div>
+</form>
+
+{% if page_obj %}
+  <ul class="rows rows--table">
+    {% for post in page_obj %}
+      <li class="row">
+        <div class="row__main">
+          <a class="row__title" href="{% url 'studio:post_edit' post.pk %}">{{ post.title }}</a>
+          <span class="row__sub">
+            {% for t in post.tags.all %}<a class="mini-tag" href="?tag={{ t.slug }}">{{ t.name }}</a>{% empty %}بدون برچسب{% endfor %}
+          </span>
+        </div>
+        <span class="row__date">{{ post.updated_at|jdate:"short" }}</span>
+        {% include "studio/_state.html" %}
+        <div class="row__actions">
+          <a class="icon-btn" href="{% url 'studio:post_edit' post.pk %}" aria-label="ویرایش «{{ post.title }}»" title="ویرایش">{% include "studio/_icon.html" with name="edit" %}</a>
+          <a class="icon-btn" href="{{ post.get_absolute_url }}" target="_blank" rel="noopener" aria-label="دیدن «{{ post.title }}» در سایت" title="دیدن در سایت">{% include "studio/_icon.html" with name="eye" %}</a>
+          <a class="icon-btn icon-btn--danger" href="{% url 'studio:post_delete' post.pk %}" aria-label="حذف «{{ post.title }}»" title="حذف">{% include "studio/_icon.html" with name="trash" %}</a>
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+
+  {% if is_paginated %}
+    <nav class="pager" aria-label="صفحه‌بندی">
+      {% if page_obj.has_previous %}<a class="btn btn--ghost" href="{% page_url page_obj.previous_page_number %}">قبلی</a>{% else %}<span></span>{% endif %}
+      <span class="muted">صفحه {{ page_obj.number|fa_digits }} از {{ paginator.num_pages|fa_digits }}</span>
+      {% if page_obj.has_next %}<a class="btn btn--ghost" href="{% page_url page_obj.next_page_number %}">بعدی</a>{% else %}<span></span>{% endif %}
+    </nav>
+  {% endif %}
+{% else %}
+  <div class="empty">
+    {% if query or status or active_tag %}
+      <h2>نوشته‌ای با این فیلتر پیدا نشد</h2>
+      <p>فیلترها را عوض کن یا <a href="{% url 'studio:posts' %}">همه‌ی نوشته‌ها</a> را ببین.</p>
+    {% else %}
+      <h2>هنوز نوشته‌ای نداری</h2>
+      <p>با اولین نوشته شروع کن؛ هر زمان خواستی منتشرش کن.</p>
+      <a class="btn btn--primary" href="{% url 'studio:post_create' %}">نوشتن اولین نوشته</a>
+    {% endif %}
+  </div>
+{% endif %}
+{% endblock %}

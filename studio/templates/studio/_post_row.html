@@ -1,0 +1,18 @@
+{% load blog_extras %}
+<li class="row">
+  <div class="row__main">
+    <a class="row__title" href="{% url 'studio:post_edit' post.pk %}">{{ post.title }}</a>
+    {% if post.tags.all %}
+      <span class="row__tags">
+        {% for t in post.tags.all %}<span>#{{ t.name }}</span>{% endfor %}
+      </span>
+    {% endif %}
+  </div>
+  <span class="pill pill--{{ post.state }}">{{ post.state_label }}</span>
+  <time class="row__date" datetime="{{ post.updated_at|date:'c' }}">{{ post.updated_at|jdate }}</time>
+  <div class="row__actions">
+    <a href="{% url 'studio:post_edit' post.pk %}">ویرایش</a>
+    <a href="{{ post.get_absolute_url }}" target="_blank" rel="noopener">مشاهده</a>
+    <a class="is-danger" href="{% url 'studio:post_delete' post.pk %}">حذف</a>
+  </div>
+</li>
