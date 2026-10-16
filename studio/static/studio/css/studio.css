@@ -1,61 +1,62 @@
 /* ==========================================================================
    Studio — the writing desk.
-   Palette: lapis (ink), saffron (highlighter), turquoise (live).
-   RTL-first; uses logical properties so it also works in LTR.
+   Cyberpunk Black & Purple Edition.
    ========================================================================== */
 
 :root,
 [data-theme="light"] {
-  --paper: #eef1f6;
-  --panel: #ffffff;
-  --panel-2: #f5f7fb;
-  --ink: #14203a;
-  --muted: #5b6885;
-  --line: #dbe1ec;
-  --rail-bg: #1b2a52;
-  --rail-ink: #e6ebf8;
-  --rail-muted: #9aa8cd;
-  --rail-hover: rgba(255, 255, 255, 0.08);
-  --saffron: #f4b400;
-  --saffron-ink: #2a1d00;
-  --saffron-soft: rgba(244, 180, 0, 0.2);
-  --turq: #0b7f74;
-  --turq-soft: rgba(15, 157, 143, 0.14);
-  --sky: #2f58b8;
-  --sky-soft: rgba(47, 88, 184, 0.12);
-  --amber: #8a5a00;
-  --amber-soft: rgba(244, 180, 0, 0.2);
-  --rose: #b42338;
-  --rose-soft: rgba(180, 35, 56, 0.1);
-  --focus: #25386f;
-  --code-bg: rgba(27, 42, 82, 0.08);
-  --shadow: 0 1px 2px rgba(20, 32, 58, 0.06), 0 10px 30px rgba(20, 32, 58, 0.07);
-  color-scheme: light;
+  --paper: #0f0720;
+  --panel: #170d30;
+  --panel-2: #211342;
+  --ink: #f5f0ff;
+  --muted: #b19ecc;
+  --line: #44226d;
+  --rail-bg: #0c051a;
+  --rail-ink: #f5f0ff;
+  --rail-muted: #a796c4;
+  --rail-hover: rgba(192, 64, 255, 0.12);
+  --saffron: #c040ff;
+  --saffron-ink: #07030e;
+  --saffron-soft: rgba(192, 64, 255, 0.2);
+  --turq: #00e5ff;
+  --turq-soft: rgba(0, 229, 255, 0.16);
+  --sky: #d946ef;
+  --sky-soft: rgba(217, 70, 239, 0.16);
+  --amber: #ffd000;
+  --amber-soft: rgba(255, 208, 0, 0.16);
+  --rose: #ff3377;
+  --rose-soft: rgba(255, 51, 119, 0.16);
+  --focus: #c040ff;
+  --code-bg: rgba(192, 64, 255, 0.12);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 10px 30px rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
 }
 
 [data-theme="dark"] {
-  --paper: #0a1020;
-  --panel: #111a30;
-  --panel-2: #16213b;
-  --ink: #e6ebf8;
-  --muted: #98a5c4;
-  --line: #243153;
-  --rail-bg: #060a15;
-  --rail-ink: #e6ebf8;
-  --rail-muted: #8b98ba;
-  --rail-hover: rgba(255, 255, 255, 0.07);
-  --saffron-soft: rgba(244, 180, 0, 0.16);
-  --turq: #38d4c4;
-  --turq-soft: rgba(56, 212, 196, 0.14);
-  --sky: #86a8ff;
-  --sky-soft: rgba(134, 168, 255, 0.14);
-  --amber: #f4b400;
-  --amber-soft: rgba(244, 180, 0, 0.14);
-  --rose: #ff8396;
-  --rose-soft: rgba(255, 131, 150, 0.12);
-  --focus: #f4b400;
-  --code-bg: rgba(255, 255, 255, 0.08);
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px rgba(0, 0, 0, 0.35);
+  --paper: #07030e;
+  --panel: #0e071c;
+  --panel-2: #160c2b;
+  --ink: #eee4ff;
+  --muted: #9c8bbd;
+  --line: #2b154a;
+  --rail-bg: #05020a;
+  --rail-ink: #eee4ff;
+  --rail-muted: #9481b5;
+  --rail-hover: rgba(176, 38, 255, 0.12);
+  --saffron: #b026ff;
+  --saffron-ink: #05020a;
+  --saffron-soft: rgba(176, 38, 255, 0.22);
+  --turq: #00f0ff;
+  --turq-soft: rgba(0, 240, 255, 0.16);
+  --sky: #c084fc;
+  --sky-soft: rgba(192, 132, 252, 0.16);
+  --amber: #ffe600;
+  --amber-soft: rgba(255, 230, 0, 0.15);
+  --rose: #ff2a6d;
+  --rose-soft: rgba(255, 42, 109, 0.16);
+  --focus: #b026ff;
+  --code-bg: rgba(176, 38, 255, 0.14);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.7), 0 10px 30px rgba(0, 0, 0, 0.8);
   color-scheme: dark;
 }
 
@@ -386,7 +387,7 @@ a.stat:hover { background: var(--panel-2); }
   background-color: var(--rail-bg);
   background-image:
     repeating-conic-gradient(from 45deg at 50% 50%, rgba(255,255,255,0.05) 0 25%, transparent 0 50%),
-    radial-gradient(60% 60% at 80% 15%, rgba(244, 180, 0, 0.22), transparent 70%);
+    radial-gradient(60% 60% at 80% 15%, rgba(176, 38, 255, 0.35), transparent 70%);
   background-size: 64px 64px, 100% 100%;
   color: var(--rail-ink);
 }
